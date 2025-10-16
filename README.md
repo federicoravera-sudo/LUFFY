@@ -1,4 +1,4 @@
-# 🧬 Systematic Molecular Analysis for Molecular Field-Coupled Nanocomputing
+# 🧬 LUFFY: a Layered Unified Framework for molFCN systematic analYsis
 
 This repository provides a **complete framework for the systematic analysis of molecules** used in **Molecular Field-Coupled Nanocomputing (MFCN)**.  
 Starting from a simple `.xyz` molecular geometry, it guides you through **conformational exploration**, **geometry optimization**, and **DFT-level characterization**, all in an HPC-ready workflow.
