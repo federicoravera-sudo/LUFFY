@@ -1,12 +1,12 @@
-function settings = initSettings(moleculeName, ii,charAtomsMatrix, opt)
+function settings = initSettings(moleculeName, ii,charAtomsMatrix, opt, charge, mult)
 settings.MOLECULE_NAME        =   sprintf("%s_Cf%d",moleculeName,ii);
 settings.MOLECULE_FORMULA     =   sprintf("%s_Cf%d",moleculeName,ii);
 settings.WORKSPACE            =   sprintf("%s\\Cf%d",moleculeName,ii);
 settings.CHAR_ATOMS = charAtomsMatrix;
 settings.GEOMETRY_COMMENT     =   "Automatic file conformers generation";
 settings.GEOMETRY_FILE        =   fullfile(pwd, moleculeName, "conformers",sprintf("Conformer%d.txt",ii));
-settings.ABINITIO_CHARGE      =   1;
-settings.ABINITIO_MULT        =   2;
+settings.ABINITIO_CHARGE      =   charge;
+settings.ABINITIO_MULT        =   mult;
 if opt == 1
   settings.ABINITIO_METHOD      =   "UKS";
 else
@@ -16,7 +16,7 @@ end
 settings.ABINITIO_FUNCTIONAL  =   "CAM-B3LYP";
 settings.ABINITIO_BASISSET    =   "def2-TZVP";
 settings.ABINITIO_CORRECTIONS =   "D4";
-settings.ABINITIO_NPROC       =   36;
+settings.ABINITIO_NPROC       =   64;
 
 settings.ABINITIO_OPTIONS     =   ""; % for instance VerySlowConv and similar
 

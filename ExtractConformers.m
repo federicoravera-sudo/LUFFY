@@ -1,6 +1,5 @@
+function ExtractConformers(inputFile,outPath,numberofAtoms)
 
-  inputFile =""; 
-  outPath = "";
 % Leggi tutto il contenuto del file
 fileID = fopen(inputFile, 'r');
 content = textscan(fileID, '%s', 'Delimiter', '\n');
@@ -17,7 +16,7 @@ for i = 1:length(lines)
     line = lines{i};
     
    
-    if startsWith(line, '') %insert number of atoms
+    if startsWith(line, numberofAtoms) %insert number of atoms
         
         if ~isempty(currentFile)
             fclose(currentFile);
@@ -33,4 +32,5 @@ for i = 1:length(lines)
 end
 if ~isempty(currentFile)
     fclose(currentFile);
+end
 end

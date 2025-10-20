@@ -1,12 +1,22 @@
-clearvars; close all;
+clearvars; close all; clc;
 cd 'C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY'
 % ==== Parameters ====
-max_indexCf = 5; min_indexCf = 1;
-new = 0; SP = 0; analysis = 0; ck = 0; opt = 1;
-moleculeName = "Diferrocenylcarborane";
+max_indexCf = 1; min_indexCf = 1;
+SP = 0; analysis = 0; ck = 0; opt = 0; extract_conf = 0; set_VACT_analysis = 1;
+moleculeName = "DatabaseMol\\Diferrocenylcarborane";
+numberofAtoms = '83'; %place here the molecule number of atoms
+ckValue = +1;
+charge = 1;
+mult = 3;
 
 % ==== Paths ====
 basePath = 'C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY';
+VACTanalysisName = '02_characterisation_folder_ck0';
+if extract_conf 
+    inputFile =fullfile(basePath,moleculeName, "conformers","crest_conformers.xyz"); 
+    outPath = fullfile(basePath,moleculeName, "conformers");
+    ExtractConformers(inputFile,outPath,numberofAtoms);
+else
 
 % ==== Initialization ====
 charAtomsMatrix = readmatrix("C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY\CharAtomsForSingle.txt");
@@ -14,20 +24,28 @@ charAtomsMatrix = readmatrix("C:\Users\55fed\OneDrive - Politecnico di Torino\Do
 for kk = 1:max_indexCf
     conformers_number = kk;
 
-    prepareConformers(moleculeName, conformers_number, SP, analysis, opt, ck, basePath);
+    prepareConformers(moleculeName, conformers_number, SP, analysis, opt, ck, ckValue, basePath, VACTanalysisName);
 
-    settings = initSettings(moleculeName, kk, charAtomsMatrix, opt);
+    settings = initSettings(moleculeName, kk, charAtomsMatrix, opt,charge, mult);
     
     if opt
         S1_GenerateOptimization(settings);
     end
+        % 4. SP workflow
+    if set_VACT_analysis
+        settings.VACTanalysisName = VACTanalysisName;
+        S2_GenerateCharacteristics(settings);
+    end
+
+    if SP
+        prepareSP(comboNumber, ii, nature, basePath);
+    end
+
     % 3. Run analysis if required
     if analysis
         runAnalysis(settings);
     end
 
-    % 4. SP workflow
-    if SP
-        prepareSP(comboNumber, ii, nature, basePath);
-    end
+
+end
 end
