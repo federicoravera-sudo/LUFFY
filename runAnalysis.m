@@ -1,16 +1,11 @@
-function runAnalysis(settings)
+function runAnalysis(settings,basePath,moleculeName,VACTanalysisName,conformers_number)
 %RUNANALYSIS Run the analysis workflow with autochar
 %
 %   runAnalysis(settings)
 %
 %   Takes the settings struct and calls the appropriate autochar steps.
 
-    fprintf(">> Running analysis for %s\n", settings.MOLECULE_NAME);
-
-    % Make sure autochar is in the path
-    addpath('\autochar');
-    cd('\autochar');
-
+    fprintf(">> Running analysis for %s\n", moleculeName);
     % Example options (can be parametrized)
     opt_dipole   = 1;   % analyse dipole alignment
     opt_vout     = 1;   % analyse output potential
@@ -20,27 +15,24 @@ function runAnalysis(settings)
     % Initialise error collectors (optional, can be passed in/out)
     errors_x = []; errors_y = []; errors_z = [];
 
-    % ---- Choose analysis routine ----
-    try
         % Standard characteristics analysis
         % [assoctable, errors_x, errors_y, errors_z] = ...
         %     S3_AnalyseCharacteristics(settings, errors_x, errors_y, errors_z);
 
         % Extended analysis with options
         [assoctable, errors_x, errors_y, errors_z] = ...
-            S3_AnalyseCharacteristicsFEDE(settings, opt_dipole, opt_vout, ...
+            S3_AnalyseCharacteristicsPerturbative(settings, opt_dipole, opt_vout, ...
                                           opt_dipole_z, opt_dipole_y, ...
-                                          errors_x, errors_y, errors_z);
+                                          errors_x, errors_y, errors_z,VACTanalysisName,moleculeName,conformers_number);
 
         % Save results table
-        baseDirOut  = sprintf('C:\\Users\\55fed\\OneDrive - Politecnico di Torino\\Dottorato\\Molecules_DB\\DFTB\\the-molecular-suite-developer2\\autochar\\%s', settings.WORKSPACE);
-        fileName    = sprintf('%s_SemiStatic_ck-1.txt', settings.MOLECULE_NAME);
-        filePath    = fullfile(baseDirOut, fileName);
-
+        fileName    = sprintf('%s_Cf%d.txt', VACTanalysisName,conformers_number);
+        filePath    = fullfile(basePath,moleculeName, fileName);
+        
         writetable(assoctable, filePath);
         fprintf("   Results saved to %s\n", filePath);
-
-    catch ME
-        warning("Analysis failed for %s: %s", settings.MOLECULE_NAME, ME.message);
-    end
+        disp("Analyse the modelling results and then press ENTER")
+        pause;
+        close all
+        
 end

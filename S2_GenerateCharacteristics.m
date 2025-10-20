@@ -1,4 +1,4 @@
-function S2_GenerateCharacteristics(userSettings)
+function S2_GenerateCharacteristics(userSettings,conformers_number)
 
 %constants
 DefineConstants
@@ -18,7 +18,8 @@ DefineConstants
 %end
 
 %define DB files
-DB_MolFolderName=sprintf("%s_%s",userSettings.MOLECULE_NAME,userSettings.MOLECULE_FORMULA);
+shortName = regexp(userSettings.MOLECULE_NAME, '[^\\\/]+$', 'match', 'once');
+DB_MolFolderName=sprintf("%s_%s",shortName,userSettings.MOLECULE_FORMULA);
 DB_GeomFolderName=sprintf("Geom%d_%s_%s",userSettings.DB_GEOMNUMBER,userSettings.ABINITIO_FUNCTIONAL,userSettings.ABINITIO_BASISSET);
 
 %create mol structure
@@ -106,7 +107,8 @@ Display_Molecule(optimizedMol);
 
 % Save geometry into database
 ORCA_newGeometry = GenerateORCAGeometry(optimizedMol);
-DB_GeomFolder = fullfile(userSettings.working_path, userSettings.WORKSPACE, 'DB', regexp(userSettings.MOLECULE_NAME, '[^\\\/]+$', 'match', 'once'), 'isolated_characterization', DB_GeomFolderName);
+combinedName = sprintf('%s_%s', shortName, shortName);
+DB_GeomFolder = fullfile(userSettings.working_path, userSettings.WORKSPACE, 'DB', combinedName, 'isolated_characterization', DB_GeomFolderName);
 DB_GeomFileName = fullfile(DB_GeomFolder, 'geometry.txt');
 DB_GeomFileContent = sprintf("%d\r\nGenerated with autochar tool\r\n%s", optimizedMol.n_atoms, ORCA_newGeometry);
 generateFile(0, DB_GeomFileName, DB_GeomFileContent);
@@ -170,7 +172,7 @@ ORCA_InputFileContent = keyWordReplace(ORCA_InputFileContent, userSettings);
 ORCA_InputFileContent = strrep(ORCA_InputFileContent, "BASH_COORDINATES", ORCA_newGeometry);
 
 % Create input template file
-ORCA_charTemplateName = sprintf("%sTEMPLATE.inp", OptFileName);
+ORCA_charTemplateName = sprintf("%sTEMPLATE.inp", regexp(userSettings.MOLECULE_NAME, '[^\\\/]+$', 'match', 'once'));
 ORCA_charTemplatePath = fullfile(userSettings.working_path, userSettings.WORKSPACE, userSettings.VACTanalysisName, ORCA_charTemplateName);
 generateFile(0, ORCA_charTemplatePath, ORCA_InputFileContent);
 
@@ -306,6 +308,7 @@ grid on;
 hold off;
 xlim([-20 25])
 ylim([-20 20])
+
 end
 end
 

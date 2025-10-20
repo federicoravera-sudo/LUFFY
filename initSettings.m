@@ -1,6 +1,7 @@
-function settings = initSettings(moleculeName, ii,charAtomsMatrix, opt, charge, mult)
+function settings = initSettings(moleculeName, ii,charAtomsMatrix, opt, charge, mult, nprocs)
 settings.MOLECULE_NAME        =   sprintf("%s_Cf%d",moleculeName,ii);
-settings.MOLECULE_FORMULA     =   sprintf("%s_Cf%d",moleculeName,ii);
+shortName = regexp(moleculeName, '[^\\\/]+$', 'match', 'once');
+settings.MOLECULE_FORMULA     =   sprintf("%s_Cf%d",shortName,ii);
 settings.WORKSPACE            =   sprintf("%s\\Cf%d",moleculeName,ii);
 settings.CHAR_ATOMS = charAtomsMatrix;
 settings.GEOMETRY_COMMENT     =   "Automatic file conformers generation";
@@ -16,7 +17,7 @@ end
 settings.ABINITIO_FUNCTIONAL  =   "CAM-B3LYP";
 settings.ABINITIO_BASISSET    =   "def2-TZVP";
 settings.ABINITIO_CORRECTIONS =   "D4";
-settings.ABINITIO_NPROC       =   64;
+settings.ABINITIO_NPROC       =   nprocs;
 
 settings.ABINITIO_OPTIONS     =   ""; % for instance VerySlowConv and similar
 
