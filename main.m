@@ -49,7 +49,7 @@ for kk = min_indexCf:max_indexCf
     end  
 end
 if singleSPanalysis
-    analyzeSingleMolecule(moleculeName, min_indexCf, max_indexCf) %run single SP analysis
+    analyzeSingleMolecule(moleculeName, min_indexCf, max_indexCf) %run standalone SP analysis
 end
 end
 

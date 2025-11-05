@@ -33,8 +33,15 @@ function runLUFFYsimulation(moleculeName, conformers_number, SP, analysis, opt, 
     % === Step 4. Characterization stage (VACT or SP) ===
     if SP || set_VACT_analysis
         settings.VACTanalysisName = VACTanalysisName;
+        
         S2_GenerateCharacteristics(settings,conformers_number);
-
+        
+        if conformers_number == 1
+            disp("Check molecule orientation and then press ENTER")
+            pause;
+        end
+        
+        close all;
         % Prepare SP folder and copy required files
         if SP
             prepareSP(moleculeName, conformers_number, basePath, VACTanalysisName);
