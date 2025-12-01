@@ -1,51 +1,55 @@
 clearvars; close all; clc;
 cd 'C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY'
-% ==== Parameters ====
-max_indexCf = 1; min_indexCf = 1;
-SP = 0; analysis = 0; ck = 0; opt = 0; extract_conf = 0; set_VACT_analysis = 1;
-moleculeName = "DatabaseMol\\Diferrocenylcarborane";
-numberofAtoms = '83'; %place here the molecule number of atoms
-ckValue = +1;
-charge = 1;
-mult = 3;
 
-% ==== Paths ====
+% Load parameters from GUI
+params = LUFFY_GUI();
+
+% Unpack into your variables
+max_indexCf       = params.max_indexCf;
+min_indexCf       = params.min_indexCf;
+LUFFYsimulation   = params.LUFFYsimulation;
+LUFFYload         = params.LUFFYload;
+LUFFYanalysis     = params.LUFFYanalysis;
+SP                = params.SP;
+analysis          = params.analysis;
+ck                = params.ck;
+opt               = params.opt;
+set_VACT_analysis = params.set_VACT_analysis;
+numberofAtoms     = params.numberofAtoms;
+ckValue           = params.ckValue;
+charge            = params.charge;
+mult              = params.mult;
+nprocs            = params.nprocs;
+singleSPanalysis  = params.singleSPanalysis;
+extract_conf = params.extract_conf;
+moleculeName = sprintf('DatabaseMol\\%s', params.moleculeShortName);
+VACTanalysisName = params.VACTanalysisName;
+disp('✅ Parameters successfully loaded from GUI.');
+
 basePath = 'C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY';
-VACTanalysisName = '02_characterisation_folder_ck0';
+charAtomsMatrix = readmatrix("C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY\CharAtomsForSingle.txt");
 if extract_conf 
     inputFile =fullfile(basePath,moleculeName, "conformers","crest_conformers.xyz"); 
     outPath = fullfile(basePath,moleculeName, "conformers");
     ExtractConformers(inputFile,outPath,numberofAtoms);
 else
-
-% ==== Initialization ====
-charAtomsMatrix = readmatrix("C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY\CharAtomsForSingle.txt");
-
-for kk = 1:max_indexCf
+for kk = min_indexCf:max_indexCf
     conformers_number = kk;
-
-    prepareConformers(moleculeName, conformers_number, SP, analysis, opt, ck, ckValue, basePath, VACTanalysisName);
-
-    settings = initSettings(moleculeName, kk, charAtomsMatrix, opt,charge, mult);
-    
-    if opt
-        S1_GenerateOptimization(settings);
-    end
-        % 4. SP workflow
-    if set_VACT_analysis
-        settings.VACTanalysisName = VACTanalysisName;
-        S2_GenerateCharacteristics(settings);
-    end
-
-    if SP
-        prepareSP(comboNumber, ii, nature, basePath);
-    end
-
-    % 3. Run analysis if required
-    if analysis
-        runAnalysis(settings);
-    end
-
-
+    if LUFFYsimulation
+        runLUFFYsimulation(moleculeName, conformers_number, SP, analysis, opt, ck, ...
+            ckValue, basePath, VACTanalysisName, charAtomsMatrix, ...
+            charge, mult, nprocs, set_VACT_analysis);
+    elseif LUFFYload
+        loadData(basePath, moleculeName, opt, SP, set_VACT_analysis, VACTanalysisName);
+    elseif LUFFYanalysis
+        if analysis
+            settings = initSettings(moleculeName, conformers_number, charAtomsMatrix, opt, charge, mult, nprocs);
+            runAnalysis(settings,basePath,moleculeName,VACTanalysisName,conformers_number); %run VACT characterisation
+        end        
+    end  
+end
+if singleSPanalysis
+    analyzeSingleMolecule(moleculeName, min_indexCf, max_indexCf) %run standalone SP analysis
 end
 end
+

@@ -1,4 +1,4 @@
-function [assoctable,errors_x,errors_y,errors_z]  = S3_AnalyseCharacteristicsFEDE(userSettings, opt_dipole, opt_vout, opt_dipole_z, opt_dipole_y, errors_x,errors_y,errors_z);
+function [assoctable,errors_x,errors_y,errors_z]  = S3_AnalyseCharacteristicsPerturbative(userSettings, opt_dipole, opt_vout, opt_dipole_z, opt_dipole_y, errors_x,errors_y,errors_z,VACTanalysisName,moleculeName,conformers_number)
 
 keepVoutChargeChanges = 1;
 keepDipoleZChargeChanges = 0;
@@ -7,7 +7,8 @@ dot_plot_colors = {'r','g','b','c','m','y','k'};
 
 %% molecule geometry
 %geometry from DB
-DB_MolFolderName=sprintf("%s_%s",userSettings.MOLECULE_NAME,userSettings.MOLECULE_FORMULA);
+shortName = regexp(moleculeName, '[^\\\/]+$', 'match', 'once');
+DB_MolFolderName=sprintf("%s_Cf%d_%s_Cf%d",shortName,conformers_number,shortName,conformers_number);
 DB_GeomFolderName=sprintf("Geom%d_%s_%s",userSettings.DB_GEOMNUMBER,userSettings.ABINITIO_FUNCTIONAL,userSettings.ABINITIO_BASISSET);
 DB_GeomFilePath = fullfile(userSettings.working_path,userSettings.WORKSPACE,'DB',DB_MolFolderName,'isolated_characterization',DB_GeomFolderName,'geometry.txt');
 
@@ -104,7 +105,7 @@ end
 axis equal
 
 %simulation files
-TC_simulationDir = fullfile(userSettings.working_path,userSettings.WORKSPACE,'02_characterisation_folder_OPT_ck-1');
+TC_simulationDir = fullfile(userSettings.working_path,userSettings.WORKSPACE,VACTanalysisName);
 
 [~,PCTemplate_coords] = importPCFileTemplate(fullfile(TC_simulationDir,"pointchargesTEMPLATE.pc"));
 PC.x([1 2]) = [PCTemplate_coords(1,1) PCTemplate_coords(2,1)];
@@ -113,33 +114,12 @@ PC.z([1 2]) = [PCTemplate_coords(1,3) PCTemplate_coords(2,3)];
 PC.element = ["big_red","big_red"];
 PC.n_atoms = 2;
 
-
-%Display_Molecule(PC), axis equal
-% 
-% % generation of clock pointcharges
-% if length(userSettings.CHAR_ATOMS) == 3
-%     PC_CK.x([1 2]) = [-userSettings.CHAR_CLOCKS_DIST   userSettings.CHAR_CLOCKS_DIST + mol_height];
-%     PC_CK.y([1 2]) = 0.5*(DOT1_coord(2) + DOT2_coord(2)).*[1 1];
-%     PC_CK.z([1 2]) = 0.5*(DOT1_coord(2) + DOT2_coord(2)).*[1 1];
-%     PC_CK.element = ["big_blue","big_blue"];
-%     PC_CK.n_atoms = 2;  
-%     Display_Molecule(PC_CK), axis equal
-% else
-%     PC_CK.n_atoms = 0;
-% end
-
-
-
 %get files for the VACT
-nameFormat = strcat(userSettings.MOLECULE_NAME,'tc_%f_%f_ck%f.out');
+nameFormat = strcat(shortName,sprintf('_Cf%d',conformers_number),'tc_%f_%f_ck%f.out');
 tc_fileList = dir(fullfile(TC_simulationDir,'*.out'));
 tc_numFiles = length(tc_fileList); 
 
 for ii = 1:tc_numFiles
-    %import current molecule
-    if ii == 22
-        a = 1;
-    end
     tc_simulation(ii) = importFromOrca(fullfile(TC_simulationDir,tc_fileList(ii).name),molGeometry.n_atoms); 
     
 end
@@ -178,7 +158,7 @@ for ii = 1:tc_numFiles
     
     %Evaluate voltage
     TCDATA_Vin(clkList == CLK,1,jj(clkList == CLK)) = (q*k*(QD1/norm(DOT_coords(1,:) - [PC.x(1) PC.y(1) PC.z(1)]) + QD2/norm(DOT_coords(1,:) - [PC.x(2) PC.y(2) PC.z(2)]) - QD1/norm(DOT_coords(2,:) - [PC.x(1) PC.y(1) PC.z(1)]) - QD2/norm(DOT_coords(2,:) - [PC.x(2) PC.y(2) PC.z(2)])))/1e-10;
-%    TCDATA_VinVert(clkList == CLK,1,jj(clkList == CLK)) = (q*k*(QD1/norm(DOT_coords(1,:) - [PC.x(1) PC.y(1) PC.z(1)]) + QD2/norm(DOT_coords(1,:) - [PC.x(2) PC.y(2) PC.z(2)]) - QD1/norm(DOT_coords(2,:) - [PC.x(1) PC.y(1) PC.z(1)]) - QD2/norm(DOT_coords(2,:) - [PC.x(2) PC.y(2) PC.z(2)])))/1e-10;
+%   TCDATA_VinVert(clkList == CLK,1,jj(clkList == CLK)) = (q*k*(QD1/norm(DOT_coords(1,:) - [PC.x(1) PC.y(1) PC.z(1)]) + QD2/norm(DOT_coords(1,:) - [PC.x(2) PC.y(2) PC.z(2)]) - QD1/norm(DOT_coords(2,:) - [PC.x(1) PC.y(1) PC.z(1)]) - QD2/norm(DOT_coords(2,:) - [PC.x(2) PC.y(2) PC.z(2)])))/1e-10;
     %Evaluate charges (somma le cariche del raggruppamento qui)
     for ac_index=1:userSettings.TC_ACNUMBER
         TCDATA_dotCharge(clkList == CLK,ac_index,jj(clkList == CLK)) = sum(simUnderAnalysis.espCharge(userSettings.ACListAtoms{ac_index}));

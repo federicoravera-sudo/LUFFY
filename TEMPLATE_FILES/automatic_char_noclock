@@ -1,0 +1,42 @@
+#! /bin/bash 
+source SERVER_ORCAINIT
+
+sed -e "s/\r//g" MOLECULE_NAMETEMPLATE.inp
+
+D1=($(seq CHAR_MINCHARGE CHAR_SPAN CHAR_MAXCHARGE));
+D2=($(seq CHAR_MAXCHARGE -CHAR_SPAN CHAR_MINCHARGE));
+
+total_drivers=${#D1[*]}
+
+echo Number of drivers: $total_drivers
+
+cp initialOrbitals.gbw orbitals.gbw
+
+for j in `seq 0 $(( $total_drivers - 1 ))`;
+do
+    echo Launching simulation charges: ${D1[j]}  ${D2[j]} Clock: 0
+    
+    # pointcharge file
+    cp pointchargesTEMPLATE.pc pointcharges.pc 
+    sed -i "s/PCD1/${D1[j]}/g" pointcharges.pc 
+    sed -i "s/PCD2/${D2[j]}/g" pointcharges.pc 
+
+    #name of files
+    infile="MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.inp"
+    gbwfile="MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.gbw"
+    outfile="MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.out"
+
+    #copy pointcharge file for debug purpose
+    pcfile="MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.pc"
+    cp pointcharges.pc $pcfile
+
+    #create input file
+    cp MOLECULE_NAMETEMPLATE.inp $infile
+
+    #simulation
+    $ORCA_FOLDER/orca $infile > $outfile 
+
+    #speed up calculation by copying last gbw
+    cp $gbwfile orbitals.gbw
+done  
+echo "Simulation ended! Best regards!"  | mail -s "Simulation report" USER_MAIL
