@@ -1,0 +1,54 @@
+#!/bin/bash
+#SBATCH --job-name=JOB_NAME
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=USER_MAIL
+#SBATCH --partition=global
+#SBATCH --time=120:00:00
+#SBATCH --workdir=WORKDIR
+#SBATCH --output=OUT_FILENAME
+#SBATCH --ntasks=NTASKS
+#SBATCH --gres=gpu:0
+
+#----------------------------
+USERNAME="USER_NAME"
+ORCAFOLDER="ORCA_PATH"
+workdir_path="WORKDIR"
+
+sed -e "s/\r//g" $workdir_path/MOLECULE_NAMETEMPLATE.inp
+
+D1=($(seq CHAR_MINCHARGE CHAR_SPAN CHAR_MAXCHARGE));
+D2=($(seq CHAR_MAXCHARGE -CHAR_SPAN CHAR_MINCHARGE));
+
+total_drivers=${#D1[*]}
+
+echo Number of drivers: $total_drivers
+
+cp $workdir_path/initialOrbitals.gbw $workdir_path/orbitals.gbw
+
+for j in `seq 0 $(( $total_drivers - 1 ))`;
+do
+    echo Launching simulation charges: ${D1[j]}  ${D2[j]} Clock: 0
+    
+    # pointcharge file
+    cp $workdir_path/pointchargesTEMPLATE.pc $workdir_path/pointcharges.pc 
+    sed -i "s/PCD1/${D1[j]}/g" $workdir_path/pointcharges.pc 
+    sed -i "s/PCD2/${D2[j]}/g" $workdir_path/pointcharges.pc 
+
+    #name of files
+    infile="$workdir_path/MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.inp"
+    gbwfile="$workdir_path/MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.gbw"
+    outfile="$workdir_path/MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.out"
+
+    #copy pointcharge file for debug purpose
+    pcfile="MOLECULE_NAMEtc_${D1[j]}_${D2[j]}.pc"
+    cp pointcharges.pc $pcfile
+    
+    #create input file
+    cp $workdir_path/MOLECULE_NAMETEMPLATE.inp $infile
+
+    #simulation
+    $ORCAFOLDER/orca $infile > $outfile 
+
+    #speed up calculation by copying last gbw
+    cp $gbwfile $workdir_path/orbitals.gbw
+done  

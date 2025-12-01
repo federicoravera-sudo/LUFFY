@@ -1,0 +1,68 @@
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) slurm/slurm-paths
+
+The following have been reloaded with a version change:
+  1) release/24.04 => release/23.04
+
+Module GCC/11.2.0 and 3 dependencies loaded.
+Module OpenMPI/4.1.1 and 10 dependencies loaded.
+Module ORCA/5.0.3 loaded.
+[n1262:989682:async:989760]    ib_iface.c:741  Assertion `gid->global.interface_id != 0' failed
+==== backtrace (tid: 989760) ====
+ 0 0x000000000001ef00 uct_ib_iface_fill_ah_attr_from_gid_lid()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/base/ib_iface.c:741
+ 1 0x000000000001ef51 uct_ib_iface_fill_ah_attr_from_addr()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/base/ib_iface.c:780
+ 2 0x0000000000059d6f uct_ud_mlx5_iface_get_av()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/accel/ud_mlx5_common.c:49
+ 3 0x000000000005a187 uct_ud_mlx5_iface_unpack_peer_address()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/accel/ud_mlx5.c:624
+ 4 0x00000000000517e0 uct_ud_iface_unpack_peer_address()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/base/ud_iface.h:529
+ 5 0x00000000000517e0 uct_ud_iface_cep_get_ep()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/base/ud_iface.c:111
+ 6 0x00000000000550f8 uct_ud_ep_rx_creq()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/base/ud_ep.c:709
+ 7 0x00000000000550f8 uct_ud_ep_process_rx()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/base/ud_ep.c:881
+ 8 0x000000000005b69a uct_ud_mlx5_iface_poll_rx()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/accel/ud_mlx5.c:510
+ 9 0x000000000005b69a uct_ud_mlx5_iface_async_progress()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/accel/ud_mlx5.c:578
+10 0x00000000000509fb uct_ud_iface_async_progress()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/base/ud_iface.c:229
+11 0x00000000000509fb uct_ud_iface_async_handler()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/uct/ib/ud/base/ud_iface.c:240
+12 0x000000000001594a ucs_async_handler_invoke()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/ucs/async/async.c:249
+13 0x000000000001594a ucs_async_handler_dispatch()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/ucs/async/async.c:271
+14 0x0000000000015a65 ucs_async_dispatch_handlers()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/ucs/async/async.c:303
+15 0x0000000000017f87 ucs_async_thread_ev_handler()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/ucs/async/thread.c:87
+16 0x000000000002b4d9 ucs_event_set_wait()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/ucs/sys/event_set.c:215
+17 0x00000000000185bd ucs_async_thread_func()  /dev/shm/build/UCX/1.11.2/GCCcore-11.2.0/ucx-1.11.2/src/ucs/async/thread.c:130
+18 0x000000000008a19a start_thread()  ???:0
+19 0x000000000010f240 __clone3()  :0
+=================================
+[n1262:989682] *** Process received signal ***
+[n1262:989682] Signal: Aborted (6)
+[n1262:989682] Signal code:  (-6)
+[n1262:989682] [ 0] /lib64/libc.so.6(+0x3ebf0)[0x7fffe363ebf0]
+[n1262:989682] [ 1] /lib64/libc.so.6(+0x8bedc)[0x7fffe368bedc]
+[n1262:989682] [ 2] /lib64/libc.so.6(raise+0x16)[0x7fffe363eb46]
+[n1262:989682] [ 3] /lib64/libc.so.6(abort+0xd3)[0x7fffe3628833]
+[n1262:989682] [ 4] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(+0x22b1b)[0x7fffd9348b1b]
+[n1262:989682] [ 5] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(+0x22bf1)[0x7fffd9348bf1]
+[n1262:989682] [ 6] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(uct_ib_iface_fill_ah_attr_from_addr+0x0)[0x7fffd9130f00]
+[n1262:989682] [ 7] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(uct_ib_iface_fill_ah_attr_from_addr+0x51)[0x7fffd9130f51]
+[n1262:989682] [ 8] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(uct_ud_mlx5_iface_get_av+0x2f)[0x7fffd916bd6f]
+[n1262:989682] [ 9] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(+0x5a187)[0x7fffd916c187]
+[n1262:989682] [10] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(uct_ud_iface_cep_get_ep+0x50)[0x7fffd91637e0]
+[n1262:989682] [11] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(uct_ud_ep_process_rx+0x308)[0x7fffd91670f8]
+[n1262:989682] [12] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(+0x5b69a)[0x7fffd916d69a]
+[n1262:989682] [13] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/ucx/libuct_ib.so.0(+0x509fb)[0x7fffd91629fb]
+[n1262:989682] [14] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(+0x1594a)[0x7fffd933b94a]
+[n1262:989682] [15] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(ucs_async_dispatch_handlers+0x45)[0x7fffd933ba65]
+[n1262:989682] [16] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(+0x17f87)[0x7fffd933df87]
+[n1262:989682] [17] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(ucs_event_set_wait+0xa9)[0x7fffd93514d9]
+[n1262:989682] [18] /software/rapids/r23.04/UCX/1.11.2-GCCcore-11.2.0/lib/libucs.so.0(+0x185bd)[0x7fffd933e5bd]
+[n1262:989682] [19] /lib64/libc.so.6(+0x8a19a)[0x7fffe368a19a]
+[n1262:989682] [20] /lib64/libc.so.6(+0x10f240)[0x7fffe370f240]
+[n1262:989682] *** End of error message ***
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun noticed that process rank 0 with PID 0 on node n1262 exited on signal 6 (Aborted).
+--------------------------------------------------------------------------
+[file orca_tools/qcmsg.cpp, line 465]: 
+  .... aborting the run
+
