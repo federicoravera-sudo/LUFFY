@@ -13,16 +13,16 @@ LUFFY **automates and orchestrates the full workflow for MolFCN molecule researc
 
 The repository provides:
 
-- automated generation of input files for **CREST** and **ORCA**  
-- structured parsing and post-processing of simulation outputs  
-- construction of **VACTs (core output)** through energy-averaged perturbation-based grouping mechanisms
-- generation of **aggregated-charge model files** compatible with SCERPA  
+- ⚙️ automated generation of input files for **CREST** and **ORCA**  
+- 📊 structured parsing and post-processing of simulation outputs  
+- ⚡ construction of **VACTs (core output)** through energy-averaged perturbation-based grouping mechanisms  
+- 📦 generation of **aggregated-charge model files** compatible with SCERPA  
 
 All quantum chemical calculations are performed using external open-source or academic software, while LUFFY ensures **consistency, reproducibility, and scalability** of the analysis pipeline.
 
 ---
 
-## Workflow
+## Workflow 🔬
 
 LUFFY follows a sequential pipeline:
 
@@ -48,7 +48,6 @@ Refines selected conformers at ab initio level (neutral and, when relevant, oxid
 - Method: **DFT (same level: CAM-B3LYP-D4 / def2-TZVP)**
 - Tool: **ORCA 5.0**
 
-
 Extracted quantities:
 - dipole moment components
 - polarizability
@@ -56,10 +55,12 @@ Extracted quantities:
 
 ---
 
-### 4. VACT extraction
+### 4. VACT extraction ⚡
 - Tool: **ORCA 5.0**
 - Method: **DFT (same level: CAM-B3LYP-D4 / def2-TZVP)**
+
 Reduces the molecular response into a compact electrostatic model:
+
 Evaluates molecular response under external fields:
 - input bias (**Vin**)
 - clock field (**Eck**)
@@ -72,9 +73,8 @@ Supported methods:
 
 ---
 
-## Role in the MolFCN pipeline
+## Role in the MolFCN pipeline 🧩
 
 LUFFY acts as the molecular front-end:
-- LUFFY: extracts reduced electrostatic descriptors (VACT)
-- SCERPA: performs circuit-level propagation  
-
+- 🧠 LUFFY: extracts reduced electrostatic descriptors (VACT)
+- 🔁 SCERPA: performs circuit-level propagation  
