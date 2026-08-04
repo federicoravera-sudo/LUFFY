@@ -636,9 +636,11 @@ These folders are created automatically by LUFFY during the workflow.
 
 ---
 
+---
+
 # STEP 10 — Single-point molecular analysis
 
-Besides VACT extraction, LUFFY can also perform a detailed analysis of the optimized molecular structure.
+Besides VACT extraction, LUFFY can also perform a detailed analysis of the optimized equilibrium geometry.
 
 Enable
 
@@ -646,7 +648,7 @@ Enable
 Run single SP analysis
 ```
 
-LUFFY automatically imports the optimized equilibrium geometry and extracts several molecular descriptors, including
+LUFFY automatically imports the optimized molecular structure and extracts several molecular descriptors, including
 
 - molecular dipole moment;
 - dipole components;
@@ -655,19 +657,17 @@ LUFFY automatically imports the optimized equilibrium geometry and extracts seve
 - atomic charges;
 - aggregated-charge representation.
 
-These descriptors are primarily intended for molecular screening, database construction and comparison among different molecular candidates.
+These quantities are primarily intended for molecular screening, database construction and comparison between different molecular candidates.
 
-Unlike the VACT extraction workflow, this analysis only requires the optimized equilibrium calculation.
-
-No Vin–Eck characterization is necessary.
+Unlike the VACT workflow, this analysis only requires the optimized equilibrium geometry and does not require a complete Vin–Eck characterization.
 
 ---
 
 # STEP 11 — Boltzmann averaging
 
-Molecular candidates often exhibit several thermally accessible conformations.
+Many molecular candidates exhibit multiple thermally accessible conformations.
 
-LUFFY therefore provides an automatic Boltzmann averaging procedure capable of constructing conformationally averaged molecular properties.
+LUFFY therefore provides an automatic Boltzmann-averaging procedure to construct ensemble-averaged molecular properties.
 
 Enable
 
@@ -675,40 +675,56 @@ Enable
 Generate Boltzmann
 ```
 
-For every conformer LUFFY automatically
+For every conformer, LUFFY automatically
 
 - imports the optimized energies;
 - computes the relative conformational energies;
 - evaluates the Boltzmann populations;
 - constructs ensemble-averaged molecular descriptors.
 
-The Boltzmann weights are computed as
+The Boltzmann population of conformer \(i\) is computed as
 
-\[
-w_i=\frac{\exp\left(-\frac{\Delta E_i}{k_BT}\right)}
-{\sum_j\exp\left(-\frac{\Delta E_j}{k_BT}\right)}
-\]
+$$
+w_i=
+\frac{
+\exp\left(-\frac{\Delta E_i}{k_{\mathrm B}T}\right)
+}{
+\sum_{j=1}^{N_{\mathrm{conf}}}
+\exp\left(-\frac{\Delta E_j}{k_{\mathrm B}T}\right)
+}
+$$
 
 where
 
-- \( \Delta E_i \) is the energy difference between conformer *i* and the lowest-energy conformer,
-- \(k_B\) is the Boltzmann constant,
-- \(T\) is the selected temperature.
+- \(w_i\) is the Boltzmann population of conformer \(i\);
+- \(\Delta E_i = E_i-E_{\min}\) is the energy difference between conformer \(i\) and the lowest-energy conformer;
+- \(k_{\mathrm B}\) is the Boltzmann constant;
+- \(T\) is the temperature;
+- \(N_{\mathrm{conf}}\) is the total number of conformers.
 
-The resulting weights are then used to compute ensemble averages of
+The ensemble average of a generic conformer-dependent property \(A\) is then computed as
 
-- dipole moments;
+$$
+\langle A\rangle=
+\sum_{i=1}^{N_{\mathrm{conf}}}
+w_iA_i.
+$$
+
+For example, LUFFY computes Boltzmann-averaged
+
+- molecular dipole moments;
 - polarizabilities;
-- Voltage-to-Aggregated-Charge Transcharacteristics;
-- molecular descriptors.
+- aggregated charges;
+- Voltage-to-Aggregated-Charge Transcharacteristics (VACTs);
+- other conformer-dependent molecular descriptors.
 
-For flexible molecular systems these averaged quantities generally provide a more physically meaningful representation than a single optimized conformer.
+For conformationally flexible molecular systems, these ensemble averages generally provide a more representative description than the lowest-energy conformer alone.
 
 ---
 
 # STEP 12 — AIMD validation (optional)
 
-LUFFY also includes a validation workflow based on **Ab Initio Molecular Dynamics (AIMD)**.
+LUFFY also provides an optional validation workflow based on **Ab Initio Molecular Dynamics (AIMD)** simulations.
 
 Enable
 
@@ -718,90 +734,81 @@ Check MD analysis
 
 The module requires
 
-- the AIMD trajectory (.xyz);
-- the corresponding ORCA output containing CHELPG charges.
+- an AIMD trajectory (`.xyz`);
+- the corresponding ORCA output containing CHELPG atomic charges.
 
 LUFFY automatically
 
 - reconstructs the molecular dipole at every AIMD frame;
-- computes the time evolution of the dipole;
-- evaluates the corresponding time averages;
-- compares the AIMD averages with the predicted VACTs.
+- computes the complete dipole evolution as a function of time;
+- evaluates the corresponding time-averaged dipole components;
+- compares the AIMD averages with both the lowest-energy-conformer and ensemble-averaged VACT predictions.
 
-The comparison is performed against
+This comparison provides a practical criterion for assessing whether the molecular dynamics remain localized around the equilibrium geometry or whether multiple conformers significantly contribute to the electrostatic response.
 
-- the lowest-energy conformer;
-- the Boltzmann-averaged VACT.
-
-This validation provides a practical criterion for selecting the most representative electrostatic model.
-
-If the lowest-energy conformer provides the smallest deviation, molecular dynamics remain localized around the equilibrium geometry.
-
-Conversely, if the Boltzmann-averaged VACT better reproduces the AIMD averages, multiple conformations contribute significantly to the molecular response and the ensemble representation should be preferred.
+The extracted quantities can therefore be used to determine the most physically representative molecular model for subsequent MolFCN simulations.
 
 ---
 
 # Generated files
 
-The following table summarizes the files generated throughout the workflow.
+The following table summarizes the main outputs generated during the LUFFY workflow.
 
-| Stage | Generated files |
-|--------|-----------------|
+| Stage | Main outputs |
+|--------|--------------|
 | Extract conformers | `Conformer1.txt ... ConformerN.txt` |
-| Optimization | `Opt.inp`, `OrcaJob.sh` |
+| Geometry optimization | `Opt.inp`, `OrcaJob.sh` |
 | ORCA optimization | `Opt.xyz`, `Opt.out` |
-| Characterization | `TEMPLATE.inp`, `pointcharges.pc`, `OrcaJob.sh` |
-| ORCA characterization | complete Vin–Eck ORCA outputs |
-| LUFFY Analysis | perturbation-grouping VACTs |
-| Single SP analysis | molecular descriptors |
-| Boltzmann | ensemble-averaged descriptors |
-| AIMD | validation plots and dipole analysis |
+| Electrostatic characterization | `TEMPLATE.inp`, `pointcharges.pc`, `OrcaJob.sh` |
+| ORCA characterization | Complete Vin–Eck ORCA outputs |
+| LUFFY Analysis | Perturbation-based VACTs |
+| Single SP analysis | Molecular descriptors |
+| Boltzmann averaging | Ensemble-averaged descriptors |
+| AIMD validation | Dipole evolution and validation plots |
 
 ---
 
 # Input → Output workflow
 
-| Input | LUFFY action | Output |
-|--------|--------------|--------|
+| Input | LUFFY operation | Output |
+|--------|-----------------|--------|
 | `crest_conformers.xyz` | Extract conformers | Individual conformers |
-| Individual conformers | Optimization generation | ORCA optimization inputs |
-| Optimized geometries | Characterization generation | ORCA characterization inputs |
+| Individual conformers | Generate optimization inputs | ORCA optimization inputs |
+| Optimized geometries | Generate characterization inputs | ORCA characterization inputs |
 | Characterization outputs | LUFFY Analysis | VACTs |
 | Optimized geometries | Single SP analysis | Molecular descriptors |
-| All conformers | Boltzmann | Ensemble descriptors |
-| AIMD trajectory | AIMD validation | Time-averaged dipoles |
+| Multiple conformers | Generate Boltzmann | Ensemble-averaged descriptors |
+| AIMD trajectory + ORCA output | AIMD validation | Time-dependent and time-averaged dipoles |
 
 ---
 
 # GUI reference
 
-The following table summarizes every option available in the LUFFY graphical interface.
+The following table summarizes the available options in the LUFFY graphical interface.
 
 | GUI option | Description |
 |------------|-------------|
-| **Extract conformers** | Splits the CREST trajectory into individual conformers. This operation is only required once after a new conformational search. |
-| **LUFFY Simulation** | Enables automatic generation of ORCA calculations. |
-| **Optimization** | Generates ORCA geometry optimization inputs. |
+| **Extract conformers** | Splits the CREST trajectory into individual conformers. This operation is only required after a new conformational search. |
+| **LUFFY Simulation** | Generates ORCA calculations. |
+| **Optimization** | Generates geometry optimization calculations. |
 | **Single Point** | Generates equilibrium single-point calculations. |
-| **VACT Analysis** | Generates the complete Vin–Eck electrostatic characterization. |
-| **LUFFY Load** | Imports completed calculations into the LUFFY database. Mainly intended for calculations performed on external clusters. |
-| **LUFFY Analysis** | Parses completed ORCA calculations and executes LUFFY post-processing. |
-| **Run VACT extraction** | Performs perturbation-based grouped-charge optimization and constructs the final Voltage-to-Aggregated-Charge Transcharacteristics. |
+| **VACT Analysis** | Generates the Vin–Eck electrostatic characterization. |
+| **LUFFY Load** | Imports completed calculations into the LUFFY database (primarily intended for external/HPC calculations). |
+| **LUFFY Analysis** | Executes the LUFFY post-processing workflow. |
+| **Run VACT extraction** | Performs perturbation-based grouped-charge optimization and constructs the final VACTs. |
 | **Run single SP analysis** | Extracts equilibrium molecular descriptors. |
 | **Generate Boltzmann** | Computes Boltzmann populations and ensemble-averaged descriptors. |
-| **Check MD analysis** | Compares AIMD time averages against VACT predictions. |
+| **Check MD analysis** | Performs AIMD-based validation of the extracted molecular response. |
 
 ---
 
 # Complete workflow
 
-The complete LUFFY workflow is therefore
-
 ```
 Molecular geometry
         │
         ▼
-CREST
+CREST conformational search
         │
         ▼
 crest_conformers.xyz
@@ -813,20 +820,20 @@ Extract conformers
 Generate ORCA optimization inputs
         │
         ▼
-Execute ORCA optimization
+Run ORCA optimization
         │
         ▼
-Generate ORCA characterization
+Generate ORCA characterization inputs
         │
         ▼
-Execute ORCA characterization
+Run ORCA characterization
         │
         ▼
 LUFFY Analysis
         │
         ├── Perturbation grouping
         ├── VACT extraction
-        ├── Single SP analysis
+        ├── Single-point analysis
         ├── Boltzmann averaging
         └── AIMD validation (optional)
         │
@@ -838,7 +845,6 @@ SCERPA / MoSQuiTo
         │
         ▼
 Circuit-level MolFCN simulations
-
 ```
 
 ---
@@ -847,158 +853,52 @@ Circuit-level MolFCN simulations
 
 | Problem | Possible cause |
 |----------|----------------|
-| LUFFY cannot find the molecule | The folder name does not match the **Molecule short name** entered in the GUI. |
-| No conformers are generated | `crest_conformers.xyz` is missing or the number of atoms is incorrect. |
-| Geometry optimization cannot start | ORCA input files have not been generated or ORCA is not installed. |
-| LUFFY Analysis fails | ORCA calculations have not completed successfully. |
-| VACTs are not generated | Electrostatic characterization is incomplete. |
-| Boltzmann averaging fails | At least one optimized conformer is missing. |
-| AIMD validation fails | The AIMD trajectory or the corresponding ORCA output is missing. |
+| LUFFY cannot locate the molecule | The folder name does not match the **Molecule short name** specified in the GUI. |
+| No conformers are extracted | `crest_conformers.xyz` is missing or the number of atoms is incorrect. |
+| Geometry optimization cannot start | ORCA input files have not been generated or ORCA is unavailable. |
+| LUFFY Analysis fails | Geometry optimization or electrostatic characterization calculations are incomplete. |
+| VACT extraction fails | ORCA characterization outputs are missing or incomplete. |
+| Boltzmann averaging cannot be performed | At least one conformer is missing the optimized energy. |
+| AIMD validation fails | The AIMD trajectory or the corresponding ORCA output containing CHELPG charges is unavailable. |
 
 ---
 
 # Please note
 
-Before running LUFFY, please keep the following points in mind.
-
-### LUFFY is a workflow manager
-
-LUFFY does **not** execute CREST, xTB or ORCA.
-
-Instead, it prepares the calculations, organizes the directory structure, parses completed calculations and constructs reduced-order molecular models.
-
-The user is responsible for launching all quantum-chemical calculations externally.
-
----
-
-### Do not modify automatically generated folders
-
-Several folders are automatically created during the workflow.
-
-Examples include
-
-```
-Cf1/
-
-DB/
-
-isolated_characterization/
-
-Geom1_FUNCTIONAL_BASISSET/
-
-geometry.txt
-```
-
-These directories are internally managed by LUFFY.
-
-They should never be manually renamed or edited.
-
----
-
-### Molecule names are case-sensitive
-
-The folder
-
-```
-DatabaseMol/
-
-ExampleMol/
-```
-
-must correspond exactly to
-
-```
-Molecule short name = ExampleMol
-```
-
-inside the GUI.
-
-All subsequent paths are automatically generated from this name.
-
----
-
-### Complete every calculation before proceeding
-
-Each stage depends on the successful completion of the previous one.
-
-For example,
-
-LUFFY Analysis requires
-
-- completed geometry optimizations;
-- completed electrostatic characterizations.
-
-Likewise,
-
-Boltzmann averaging requires all conformers to have been successfully optimized.
-
----
-
-### Verify the molecular orientation
-
-The electrostatic response depends on the molecular reference frame.
-
-Always inspect the optimized geometry before generating characterization calculations.
-
----
-
-### Perturbation grouping is automatic
-
-No user interaction is required during grouped-charge optimization.
-
-Nevertheless, users are encouraged to inspect the generated modelling errors before using the resulting VACTs in SCERPA simulations.
-
----
-
-### Recommended workflow
-
-For new molecular candidates, the recommended sequence is
+- LUFFY **does not execute** CREST, xTB or ORCA. It generates the required input files, organizes the workflow and post-processes completed calculations.
+- All quantum-chemical calculations must therefore be executed externally by the user (locally or on an HPC cluster).
+- The folder name inside `DatabaseMol` **must exactly match** the **Molecule short name** entered in the GUI.
+- Automatically generated folders (e.g. `Cf*`, `DB`, `isolated_characterization`, `Geom*`, `geometry.txt`) should **never** be manually modified.
+- Each workflow stage depends on the successful completion of the previous one. In particular, LUFFY Analysis requires completed optimization and characterization calculations.
+- The electrostatic response depends on the molecular reference frame. The optimized geometry should therefore always be inspected before generating characterization calculations.
+- Perturbation-based grouped-charge optimization is performed automatically during VACT extraction.
+- The recommended workflow for a new molecular candidate is
 
 ```
 CREST
-
-↓
-
+   ↓
 Extract conformers
-
-↓
-
+   ↓
 Generate optimization inputs
-
-↓
-
-Run ORCA
-
-↓
-
+   ↓
+Run ORCA optimization
+   ↓
 Generate characterization inputs
-
-↓
-
-Run ORCA
-
-↓
-
+   ↓
+Run ORCA characterization
+   ↓
 LUFFY Analysis
-
-↓
-
+   ↓
 Single SP analysis
-
-↓
-
+   ↓
 Boltzmann averaging
-
-↓
-
+   ↓
 (Optional) AIMD validation
-
-↓
-
+   ↓
 SCERPA
 ```
 
-Following this sequence guarantees that every intermediate file required by LUFFY has already been generated before it is used in the subsequent stage.
+Following this sequence guarantees that all intermediate files required by LUFFY are available before each subsequent stage.
 
 ---
 
@@ -1006,7 +906,7 @@ Following this sequence guarantees that every intermediate file required by LUFF
 
 If you use LUFFY in your research, please cite
 
-(Complete citation will be added after publication.)
+(The complete citation will be added after publication.)
 
 
 
