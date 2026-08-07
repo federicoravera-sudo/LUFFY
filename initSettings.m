@@ -14,7 +14,7 @@ else
   settings.ABINITIO_METHOD      =   "UKS OPT";
 end
 
-settings.ABINITIO_FUNCTIONAL  =   "WB97X-D3BJ";
+settings.ABINITIO_FUNCTIONAL  =   "CAM-B3LYP";
 settings.ABINITIO_BASISSET    =   "def2-TZVP";
 settings.ABINITIO_CORRECTIONS =   "";
 settings.ABINITIO_NPROC       =   nprocs;

@@ -1,5 +1,5 @@
 clearvars; close all; clc;
-cd 'C:\Users\55fed\OneDrive - Politecnico di Torino\Dottorato\Molecules_DB\DFTB\the-molecular-suite-developer2\autochar\LUFFY'
+cd D:\PhD\LUFFY
 
 % Load parameters from GUI
 params = LUFFY_GUI();
